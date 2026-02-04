@@ -1,33 +1,63 @@
 #!/bin/bash
 set -e
 
-# Actualizar sistema
+# -------------------------------
+# 1️⃣ Actualizar sistema
+# -------------------------------
 apt-get update -y
 apt-get upgrade -y
 
-# Instalar dependencias
+# -------------------------------
+# 2️⃣ Instalar dependencias básicas
+# -------------------------------
 apt-get install -y \
   ca-certificates \
   curl \
   gnupg \
   lsb-release \
-  git
+  git \
+  unzip
 
-# Instalar Docker
+# -------------------------------
+# 3️⃣ Instalar Docker
+# -------------------------------
 curl -fsSL https://get.docker.com | sh
 
 # Habilitar Docker
 systemctl enable docker
 systemctl start docker
 
-# Instalar Docker Compose
+# -------------------------------
+# 4️⃣ Instalar Docker Compose
+# -------------------------------
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
   -o /usr/local/bin/docker-compose
 
 chmod +x /usr/local/bin/docker-compose
 
-# Añadir usuario admin a docker
+# -------------------------------
+# 5️⃣ Añadir usuario admin al grupo docker
+# -------------------------------
 usermod -aG docker admin || true
 
-# Crear carpeta proyecto
-mkdir -p /opt/symfony-react
+# -------------------------------
+# 6️⃣ Clonar el proyecto
+# -------------------------------
+PROJ_DIR="/opt/symfony-react"
+GIT_REPO="https://github.com/nenis11andres/symfony-react.git"
+
+# Crear carpeta del proyecto
+mkdir -p $PROJ_DIR
+cd $PROJ_DIR
+
+# Clonar o actualizar repo
+if [ -d ".git" ]; then
+    git pull
+else
+    git clone $GIT_REPO . 
+fi
+
+# -------------------------------
+# 7️⃣ Levantar Docker Compose
+# -------------------------------
+docker-compose up -d
