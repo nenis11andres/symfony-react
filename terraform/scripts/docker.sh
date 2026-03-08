@@ -9,7 +9,7 @@ echo "=== INICIANDO DOCKER SETUP ==="
 # 1️⃣ Actualizar sistema
 echo "[1] Actualizando sistema..."
 apt-get update -y
-apt-get upgrade -y
+
 
 # 2️⃣ Instalar dependencias
 echo "[2] Instalando dependencias..."
@@ -31,7 +31,7 @@ chmod +x /usr/local/bin/docker-compose
 echo "[5] Añadiendo usuario admin al grupo docker..."
 usermod -aG docker admin || true
 
-# 6️⃣ Clonar proyecto
+# 6️⃣ Clonar proyecto (solo para nginx config y docker-compose)
 PROJ_DIR="/opt/symfony-react"
 GIT_REPO="https://github.com/nenis11andres/symfony-react.git"
 
@@ -40,20 +40,18 @@ mkdir -p $PROJ_DIR
 cd $PROJ_DIR
 
 if [ -d ".git" ]; then
-    echo "[6a] Actualizando repo existente..."
     git pull
 else
-    echo "[6b] Clonando repo desde GitHub..."
     git clone $GIT_REPO .
 fi
 
-# 7️⃣ Ajuste para React
-echo "[7] Ajustando React para escuchar 0.0.0.0..."
-sed -i 's/"start": "react-scripts start"/"start": "react-scripts start --host 0.0.0.0"/' frontend/package.json || true
+# 7️⃣ Descargar imágenes
+echo "[7] Descargando imágenes Docker..."
+docker pull andresnenis/symfony-react-ec2-backend:latest
+docker pull andresnenis/symfony-react-ec2-frontend:latest
 
-# 8️⃣ Levantar Docker Compose
+# 8️⃣ Levantar contenedores
 echo "[8] Levantando Docker Compose..."
-docker-compose up -d || { echo "ERROR: Docker Compose falló"; exit 1; }
+docker-compose up -d
 
-echo "=== DOCKER SETUP COMPLETADO ==="
-echo "Revisar logs en $LOG_FILE"
+docker ps
