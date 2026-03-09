@@ -1,33 +1,30 @@
 version: "3.9"
 
 services:
-
   backend:
-    image: andresnenis/symfony-react-ec2-backend:latest
+    build: ./backend
     container_name: symfony-backend
     networks:
       - symfony-net
 
   frontend:
-    image: andresnenis/symfony-react-ec2-frontend:latest
+    build: ./frontend
     container_name: react-frontend
-    ports:
-      - "3000:3000"
     networks:
       - symfony-net
-    command: npm start
 
   nginx:
     image: nginx:alpine
     container_name: symfony-nginx
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
+      - frontend
     networks:
       - symfony-net
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
 
 networks:
   symfony-net:

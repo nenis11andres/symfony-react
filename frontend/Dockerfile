@@ -1,22 +1,27 @@
-# frontend/Dockerfile
+# Fase 1: Build de React
+FROM node:20 AS build
 
-# Imagen base con Node
-FROM node:20
-
-# Directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json y package-lock.json primero
+# Copiamos dependencias
 COPY package*.json ./
-
-# Instalar dependencias
 RUN npm install
 
-# Copiar el resto del código
-COPY . .
+# Copiamos todo el código de frontend
+COPY . ./
 
-# Exponer puerto de desarrollo
-EXPOSE 3000
+# Construimos la app para producción
+RUN npm run build
 
-# Comando por defecto
-CMD ["npm", "start"]
+# Fase 2: Nginx sirve la build
+FROM nginx:alpine
+
+# Copiamos build de React
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copiamos default.conf desde la carpeta nginx (fuera de frontend)
+COPY ../nginx/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
