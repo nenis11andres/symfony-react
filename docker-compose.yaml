@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   backend:
-    build: ./backend
+    image: andresnenis/symfony-react-ec2-backend:latest
     container_name: backend
     networks:
       - symfony-net
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    image: andresnenis/symfony-react-ec2-frontend:latest
     container_name: frontend
     ports:
       - "80:80"
