@@ -1,4 +1,3 @@
-# Fase 1: build de React
 FROM node:20 AS build
 
 WORKDIR /app
@@ -10,7 +9,6 @@ COPY . .
 RUN npm run build
 
 
-# Fase 2: Nginx sirve la build
 FROM nginx:alpine
 
 COPY --from=build /app/build /usr/share/nginx/html
