@@ -7,15 +7,14 @@ services:
     container_name: backend
     networks:
       - symfony-net
-    ports:
-      - "8080:80" # opcional si quieres exponer backend directamente
+    # No necesitamos exponer al exterior, React hará proxy interno
     restart: unless-stopped
 
   frontend:
     image: andresnenis/symfony-react-ec2-frontend:latest
     container_name: frontend
     ports:
-      - "80:80"
+      - "80:80"   # Aquí está React, será lo que ve el navegador
     depends_on:
       - backend
     networks:
