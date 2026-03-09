@@ -1,40 +1,27 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-# Instalar dependencias del sistema
+# Instalar dependencias necesarias
 RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    && docker-php-ext-install pdo pdo_mysql zip
+    git unzip libicu-dev libonig-dev libzip-dev zip nginx \
+    && docker-php-ext-install intl pdo pdo_mysql zip
 
-# Activar mod_rewrite de Apache (necesario para Symfony)
-RUN a2enmod rewrite
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Instalar Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www
 
-# Directorio de trabajo
-WORKDIR /var/www/html
-
-# Copiar proyecto Symfony
+# Copiar proyecto
 COPY . .
 
-# Instalar dependencias
-RUN composer install --no-interaction --optimize-autoloader
+# Instalar dependencias Symfony
+RUN composer install --no-dev --optimize-autoloader \
+    && chown -R www-data:www-data /var/www/var
 
-# Permisos Symfony
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Copiar configuración nginx para Symfony
+COPY nginx.conf /etc/nginx/sites-enabled/default
 
-# Configurar DocumentRoot para Symfony
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
-    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
-
-# Exponer puerto
+# Exponer puertos
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+# Arrancar Nginx y PHP-FPM
+CMD ["sh", "-c", "service nginx start && php-fpm"]

@@ -1,21 +1,26 @@
 version: "3.9"
 
 services:
+
   backend:
-    image: andresnenis/symfony-react-ec2-backend:latest
-    container_name: symfony-backend
+    build: ./backend
+    container_name: backend
     networks:
       - symfony-net
+    ports:
+      - "8080:80" # opcional si quieres exponer backend directamente
+    restart: unless-stopped
 
   frontend:
-    image: andresnenis/symfony-react-ec2-frontend:latest
-    container_name: react-frontend
+    build: ./frontend
+    container_name: frontend
     ports:
       - "80:80"
     depends_on:
       - backend
     networks:
       - symfony-net
+    restart: unless-stopped
 
 networks:
   symfony-net:
