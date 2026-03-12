@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.0"
+  
+  backend "s3" {
+    bucket         = "ec2-destroy"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+  }
+}
+
 provider "aws" {
   region = var.aws_region
 }
